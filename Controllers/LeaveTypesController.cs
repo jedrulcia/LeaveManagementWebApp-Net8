@@ -10,9 +10,12 @@ using AutoMapper;
 using LeaveManagementWebApp.Models;
 using LeaveManagementWebApp.Contracts;
 using Humanizer.DateTimeHumanizeStrategy;
+using Microsoft.AspNetCore.Authorization;
+using LeaveManagementWebApp.Constants;
 
 namespace LeaveManagementWebApp.Controllers
 {
+    [Authorize (Roles = Roles.Administrator)]
     public class LeaveTypesController : Controller
     {
         private readonly IMapper mapper;
