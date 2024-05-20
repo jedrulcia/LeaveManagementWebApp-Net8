@@ -12,5 +12,7 @@ namespace LeaveManagementWebApp.Data
 
         public string EmployeeID { get; set; }
 
+        public int Period { get; set; }
+
     }
 }

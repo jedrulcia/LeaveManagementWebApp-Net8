@@ -12,6 +12,7 @@ using LeaveManagementWebApp.Contracts;
 using Humanizer.DateTimeHumanizeStrategy;
 using Microsoft.AspNetCore.Authorization;
 using LeaveManagementWebApp.Constants;
+using LeaveManagementWebApp.Contracts;
 
 namespace LeaveManagementWebApp.Controllers
 {
@@ -19,12 +20,14 @@ namespace LeaveManagementWebApp.Controllers
     public class LeaveTypesController : Controller
     {
         private readonly IMapper mapper;
+        private readonly ILeaveAllocationRepository leaveAllocationRepository;
         private readonly ILeaveTypeRepository leaveTypeRepository;
 
-        public LeaveTypesController(ILeaveTypeRepository leaveTypeRepository, IMapper mapper)
+        public LeaveTypesController(ILeaveTypeRepository leaveTypeRepository, IMapper mapper, ILeaveAllocationRepository leaveAllocationRepository)
         {
             this.leaveTypeRepository = leaveTypeRepository;
             this.mapper = mapper;
+            this.leaveAllocationRepository = leaveAllocationRepository;
         }
 
         // GET: LeaveTypes
@@ -117,6 +120,14 @@ namespace LeaveManagementWebApp.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await leaveTypeRepository.DeleteAsync(id);
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AllocateLeave(int id)
+        {
+            await leaveAllocationRepository.LeaveAllocation(id);
             return RedirectToAction(nameof(Index));
         }
     }
