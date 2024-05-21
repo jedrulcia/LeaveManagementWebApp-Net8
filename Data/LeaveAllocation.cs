@@ -10,7 +10,7 @@ namespace LeaveManagementWebApp.Data
         public LeaveType LeaveType { get; set; }
         public int LeaveTypeID { get; set; }
 
-        public string EmployeeID { get; set; }
+        public string EmployeeId { get; set; }
 
         public int Period { get; set; }
 

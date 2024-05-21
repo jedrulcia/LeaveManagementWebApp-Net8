@@ -70,6 +70,12 @@
     <script src="~/lib/sweetalert/sweetalert.min.js"></script>
     <script src="https://cdn.datatables.net/2.0.7/js/dataTables.js"></script>
     <script src="https://cdn.datatables.net/2.0.7/js/dataTables.bootstrap5.js"></script> 
+    <script>
+        $(function() 
+        {
+            $('.table').DataTable();
+        });
+    </script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
