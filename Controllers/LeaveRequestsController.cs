@@ -7,23 +7,35 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using LeaveManagementWebApp.Data;
 using LeaveManagementWebApp.Models;
+using AutoMapper;
+using LeaveManagementWebApp.Constants;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LeaveManagementWebApp.Controllers
 {
+    [Authorize]
     public class LeaveRequestsController : Controller
     {
         private readonly ApplicationDbContext _context;
+		private readonly ILeaveRequestRepository leaveRequestRepository;
 
-        public LeaveRequestsController(ApplicationDbContext context)
+		public LeaveRequestsController(ApplicationDbContext context, ILeaveRequestRepository leaveRequestRepository)
         {
             _context = context;
-        }
+			this.leaveRequestRepository = leaveRequestRepository;
+		}
 
         // GET: LeaveRequests
         public async Task<IActionResult> Index()
         {
             var applicationDbContext = _context.LeaveRequests.Include(l => l.LeaveType);
             return View(await applicationDbContext.ToListAsync());
+        }
+
+        public async Task<ActionResult> MyLeave()
+        {
+            var model = await leaveRequestRepository.GetMyLeaveDetails();
+            return View(model);
         }
 
         // GET: LeaveRequests/Details/5
@@ -60,16 +72,27 @@ namespace LeaveManagementWebApp.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("StartDate,EndDate,LeaveTypeID,DateRequested,RequestComments,Approved,Cancelled,RequestingEmployeeId,ID,DateCreated,DateModified")] LeaveRequest leaveRequest)
+        public async Task<IActionResult> Create(LeaveRequestCreateVM model)
         {
+            try
+			{
+				if (ModelState.IsValid)
+				{
+					await leaveRequestRepository.CreateLeaveRequest(model);
+					return RedirectToAction(nameof(Index));
+				}
+			}
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, "An error has occurred. Please try again later");
+            }
             if (ModelState.IsValid)
             {
-                _context.Add(leaveRequest);
-                await _context.SaveChangesAsync();
+                await leaveRequestRepository.CreateLeaveRequest(model);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["LeaveTypeID"] = new SelectList(_context.LeaveTypes, "ID", "Name", leaveRequest.LeaveTypeID);
-            return View(leaveRequest);
+            model.LeaveTypes = new SelectList(_context.LeaveTypes, "ID", "Name", model.LeaveTypeID);
+            return View(model);
         }
 
         // GET: LeaveRequests/Edit/5
