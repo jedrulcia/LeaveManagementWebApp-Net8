@@ -10,6 +10,7 @@ using LeaveManagementWebApp.Models;
 using AutoMapper;
 using LeaveManagementWebApp.Constants;
 using Microsoft.AspNetCore.Authorization;
+using LeaveManagementWebApp.Contracts;
 
 namespace LeaveManagementWebApp.Controllers
 {
@@ -25,11 +26,12 @@ namespace LeaveManagementWebApp.Controllers
 			this.leaveRequestRepository = leaveRequestRepository;
 		}
 
+        [Authorize(Roles = Roles.Administrator)]
         // GET: LeaveRequests
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.LeaveRequests.Include(l => l.LeaveType);
-            return View(await applicationDbContext.ToListAsync());
+            var model = await leaveRequestRepository.GetAdminLeaveRequestList();
+            return View(model);
         }
 
         public async Task<ActionResult> MyLeave()
@@ -41,20 +43,43 @@ namespace LeaveManagementWebApp.Controllers
         // GET: LeaveRequests/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
+            var model = await leaveRequestRepository.GetLeaveRequestAsync(id);
+            if (model == null)
             {
                 return NotFound();
             }
+            return View(model);
+        }
 
-            var leaveRequest = await _context.LeaveRequests
-                .Include(l => l.LeaveType)
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (leaveRequest == null)
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveRequest(int id, bool approvalStatus)
+        {
+            try
             {
-                return NotFound();
+                await leaveRequestRepository.ChangeApprovalStatus(id, approvalStatus);
             }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            return RedirectToAction(nameof(Index));
+        }
 
-            return View(leaveRequest);
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancel(int id)
+        {
+            try
+            {
+                await leaveRequestRepository.CancelLeaveRequest(id);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            return RedirectToAction(nameof(MyLeave));
         }
 
         // GET: LeaveRequests/Create
@@ -78,19 +103,19 @@ namespace LeaveManagementWebApp.Controllers
 			{
 				if (ModelState.IsValid)
 				{
-					await leaveRequestRepository.CreateLeaveRequest(model);
-					return RedirectToAction(nameof(Index));
+                    var isValidRequest = await leaveRequestRepository.CreateLeaveRequest(model);
+                    if(isValidRequest)
+                    {
+                        return RedirectToAction(nameof(MyLeave));
+                    }
+                    ModelState.AddModelError(string.Empty, "You have exceeded your allocation with this request.");
 				}
 			}
             catch (Exception ex)
             {
                 ModelState.AddModelError(string.Empty, "An error has occurred. Please try again later");
             }
-            if (ModelState.IsValid)
-            {
-                await leaveRequestRepository.CreateLeaveRequest(model);
-                return RedirectToAction(nameof(Index));
-            }
+
             model.LeaveTypes = new SelectList(_context.LeaveTypes, "ID", "Name", model.LeaveTypeID);
             return View(model);
         }
@@ -186,5 +211,6 @@ namespace LeaveManagementWebApp.Controllers
         {
             return _context.LeaveRequests.Any(e => e.ID == id);
         }
+
     }
 }

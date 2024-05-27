@@ -10,8 +10,11 @@ namespace LeaveManagementWebApp.Models
 		[Display (Name = "Date requested")]
 		public DateTime DateRequested { get; set; }
         [Display(Name = "Leave type")]
-		public LeaveType LeaveType { get; set; }
+		public LeaveTypeVM LeaveType { get; set; }
         public bool? Approved { get; set; }
 		public bool Cancelled { get; set; }
+		public EmployeeListVM Employee {  get; set; }
+		public string? RequestingEmployeeId { get; set; }
+		public int DaysRequested { get; set; }
 	}
 }

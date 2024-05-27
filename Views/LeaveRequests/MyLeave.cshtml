@@ -1,7 +1,7 @@
 ﻿@model EmployeeLeaveRequestViewVM
 
 @{
-    ViewData["Title"] = "My leave";
+	ViewData["Title"] = "My leave";
 }
 
 <div class="card">
@@ -37,67 +37,137 @@
 	</ul>
 </div>
 
-<hr/>
+<hr />
 <h2>Current requests</h2>
 <table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.LeaveRequests[0].StartDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LeaveRequests[0].EndDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LeaveRequests[0].LeaveType)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LeaveRequests[0].DateRequested)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LeaveRequests[0].Approved)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.LeaveRequests)
-        {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.StartDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.EndDate)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.LeaveType.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.DateRequested)
-                </td>
-                <td>
-                    @if (item.Cancelled)
-                    {
-                        <span class="badge bg-secondary">Cancelled</span>
-                    }
-                    else if(item.Approved == null)
-                    {
-                        <span class="badge bg-warning">Pending</span>
-                    }
-                    else if (item.Approved.Value)
-                    {
-                        <span class="badge bg-success">Approved</span>
-                    }
-                    else if (item.Approved.Value == false)
-                    {
-                        <span class="badge bg-danger">Rejected</span>
-                    }
-                </td>
-                <td>
-                    <a asp-action="Cancel" class="btn btn-danger btn-sm" asp-route-id="@item.Id">Cancel Request</a>
-                </td>
-            </tr>
-        }
-    </tbody>
+	<thead>
+		<tr>
+			<th>
+				@Html.DisplayNameFor(model => model.LeaveRequests[0].StartDate)
+			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.LeaveRequests[0].EndDate)
+			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.LeaveRequests[0].LeaveType)
+			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.LeaveRequests[0].DateRequested)
+			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.LeaveRequests[0].Approved)
+			</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in Model.LeaveRequests)
+		{
+			if (item.Approved == null)
+			{
+				<tr>
+					<td>
+						@Html.DisplayFor(modelItem => item.StartDate)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.EndDate)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.LeaveType.Name)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.DateRequested)
+					</td>
+					<td>
+						@if (item.Cancelled)
+						{
+							<span class="badge bg-secondary">Cancelled</span>
+						}
+						else if (item.Approved == null)
+						{
+							<span class="badge bg-warning">Pending</span>
+						}
+						else if (item.Approved.Value)
+						{
+							<span class="badge bg-success">Approved</span>
+						}
+						else if (item.Approved.Value == false)
+						{
+							<span class="badge bg-danger">Rejected</span>
+						}
+					</td>
+					<td>
+						<form>
+							<input asp-form="@item.Id" type="hidden" />
+							<button type="submit" class="btn btn-danger btn-sm">Cancel Request</button>
+						</form>
+					</td>
+				</tr>
+			}
+		}
+	</tbody>
+</table>
+
+<hr />
+<h2>Past requests</h2>
+<table class="table">
+	<thead>
+		<tr>
+			<th>
+				@Html.DisplayNameFor(model => model.LeaveRequests[0].StartDate)
+			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.LeaveRequests[0].EndDate)
+			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.LeaveRequests[0].LeaveType)
+			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.LeaveRequests[0].DateRequested)
+			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.LeaveRequests[0].Approved)
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in Model.LeaveRequests)
+		{
+			if (item.Approved != null)
+			{
+				<tr>
+					<td>
+						@Html.DisplayFor(modelItem => item.StartDate)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.EndDate)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.LeaveType.Name)
+					</td>
+					<td>
+						@Html.DisplayFor(modelItem => item.DateRequested)
+					</td>
+					<td>
+						@if (item.Cancelled)
+						{
+							<span class="badge bg-secondary">Cancelled</span>
+						}
+						else if (item.Approved == null)
+						{
+							<span class="badge bg-warning">Pending</span>
+						}
+						else if (item.Approved.Value)
+						{
+							<span class="badge bg-success">Approved</span>
+						}
+						else if (item.Approved.Value == false)
+						{
+							<span class="badge bg-danger">Rejected</span>
+						}
+					</td>
+				</tr>
+			}
+		}
+	</tbody>
 </table>
