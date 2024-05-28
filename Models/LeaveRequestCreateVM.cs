@@ -9,10 +9,14 @@ namespace LeaveManagementWebApp.Models
     {
         [Required]
         [Display(Name ="Start date")]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}")]
+        [DataType(DataType.Date)]
         public DateTime? StartDate { get; set; }
         [Required]
         [Display(Name = "End date")]
-        public DateTime? EndDate { get; set; }
+		[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}")]
+		[DataType(DataType.Date)]
+		public DateTime? EndDate { get; set; }
         [Required]
         [Display(Name = "Leave type")]
         public int LeaveTypeID { get; set; }

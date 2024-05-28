@@ -4,6 +4,7 @@ using LeaveManagementWebApp.Controllers;
 using LeaveManagementWebApp.Data;
 using LeaveManagementWebApp.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace LeaveManagementWebApp.Repositories
@@ -14,18 +15,21 @@ namespace LeaveManagementWebApp.Repositories
 		private readonly IMapper mapper;
 		private readonly IHttpContextAccessor httpContextAccessor;
 		private readonly ILeaveAllocationRepository leaveAllocationRepository;
+		private readonly IEmailSender emailSender;
 		private readonly UserManager<Employee> userManager;
 
 		public LeaveRequestRepository(ApplicationDbContext context,
 			IMapper mapper,
 			IHttpContextAccessor httpContextAccessor,
 			ILeaveAllocationRepository leaveAllocationRepository,
+			IEmailSender emailSender,
 			UserManager<Employee> userManager) : base(context)
 		{
 			this.context = context;
 			this.mapper = mapper;
 			this.httpContextAccessor = httpContextAccessor;
 			this.leaveAllocationRepository = leaveAllocationRepository;
+			this.emailSender = emailSender;
 			this.userManager = userManager;
 		}
 
@@ -50,6 +54,8 @@ namespace LeaveManagementWebApp.Repositories
 			leaveRequest.RequestingEmployeeId = user.Id;
 
 			await AddAsync(leaveRequest);
+
+			await emailSender.SendEmailAsync(user.Email, "Leave request submistted succesfully", $"Your leave request from {leaveRequest.StartDate} to {leaveRequest.EndDate} has been submitted for approval");
 
 			return true;
 		}
@@ -105,6 +111,10 @@ namespace LeaveManagementWebApp.Repositories
 			}
 
 			await UpdateAsync(leaveRequest);
+
+			var user = await userManager.FindByIdAsync(leaveRequest.RequestingEmployeeId);
+
+			await emailSender.SendEmailAsync(user.Email, "Leave request approval status", $"Your leave request from {leaveRequest.StartDate} to {leaveRequest.EndDate} has been {approvalStatus}.");
 		}
 
 		public async Task<LeaveRequestVM?> GetLeaveRequestAsync(int? id)
@@ -125,6 +135,10 @@ namespace LeaveManagementWebApp.Repositories
 			var leaveRequest = await GetAsync(leaveRequestId);
 			leaveRequest.Cancelled = true;
 			await UpdateAsync(leaveRequest);
-        }
+
+			var user = await userManager.FindByIdAsync(leaveRequest.RequestingEmployeeId);
+
+			await emailSender.SendEmailAsync(user.Email, "Leave request cancelled", $"Your leave request from {leaveRequest.StartDate} to {leaveRequest.EndDate} has been cancelled.");
+		}
     }
 }
