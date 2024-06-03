@@ -19,11 +19,15 @@ namespace LeaveManagementWebApp.Controllers
     {
         private readonly ApplicationDbContext _context;
 		private readonly ILeaveRequestRepository leaveRequestRepository;
+		private readonly ILogger<LeaveRequestsController> logger;
 
-		public LeaveRequestsController(ApplicationDbContext context, ILeaveRequestRepository leaveRequestRepository)
+		public LeaveRequestsController(ApplicationDbContext context, 
+            ILeaveRequestRepository leaveRequestRepository,
+            ILogger<LeaveRequestsController> logger)
         {
             _context = context;
 			this.leaveRequestRepository = leaveRequestRepository;
+			this.logger = logger;
 		}
 
         [Authorize(Roles = Roles.Administrator)]
@@ -62,6 +66,7 @@ namespace LeaveManagementWebApp.Controllers
             }
             catch (Exception ex)
             {
+                logger.LogError(ex, "Error approving leave request");
                 throw;
             }
             return RedirectToAction(nameof(Index));
@@ -76,8 +81,8 @@ namespace LeaveManagementWebApp.Controllers
                 await leaveRequestRepository.CancelLeaveRequest(id);
             }
             catch (Exception ex)
-            {
-                throw;
+			{
+				throw;
             }
             return RedirectToAction(nameof(MyLeave));
         }
@@ -112,8 +117,9 @@ namespace LeaveManagementWebApp.Controllers
 				}
 			}
             catch (Exception ex)
-            {
-                ModelState.AddModelError(string.Empty, "An error has occurred. Please try again later");
+			{
+				logger.LogError(ex, "Error creating leave request");
+				ModelState.AddModelError(string.Empty, "An error has occurred. Please try again later");
             }
 
             model.LeaveTypes = new SelectList(_context.LeaveTypes, "ID", "Name", model.LeaveTypeID);
@@ -163,8 +169,8 @@ namespace LeaveManagementWebApp.Controllers
                         return NotFound();
                     }
                     else
-                    {
-                        throw;
+					{
+						throw;
                     }
                 }
                 return RedirectToAction(nameof(Index));
