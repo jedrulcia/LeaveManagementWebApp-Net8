@@ -24,6 +24,7 @@ namespace LeaveManagementWebApp.Models
         [Display(Name = "Request comments")]
         public string? RequestComments { get; set; }
 
+        public LeaveType? LeaveType { get; set; }
 		public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
 		{
             if(StartDate > EndDate)
