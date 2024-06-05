@@ -63,7 +63,7 @@
 	<tbody>
 		@foreach (var item in Model.LeaveRequests)
 		{
-			if (item.Approved == null)
+			if (item.Approved == null && item.Cancelled == false)
 			{
 				<tr>
 					<td>
@@ -87,7 +87,7 @@
 						{
 							<span class="badge bg-warning">Pending</span>
 						}
-						else if (item.Approved.Value)
+						else if (item.Approved.Value == true)
 						{
 							<span class="badge bg-success">Approved</span>
 						}
@@ -98,9 +98,15 @@
 					</td>
 					<td>
 						<form asp-action="Cancel">
-							<input asp-form="@item.Id" type="hidden" />
+							<input type="hidden" asp-for="@item.Id" name="Id" />
 							<button type="submit" class="btn btn-danger btn-sm">Cancel Request</button>
 						</form>
+@* 
+						<form asp-action="Delete">
+							<input type="hidden" asp-for="Id" />
+							<a asp-action="Index" class="btn btn-dark">Back to List</a> &nbsp;
+							<input type="submit" value="Delete" class="btn btn-danger" />
+						</form> *@
 					</td>
 				</tr>
 			}
@@ -133,7 +139,7 @@
 	<tbody>
 		@foreach (var item in Model.LeaveRequests)
 		{
-			if (item.Approved != null)
+			if (item.Approved != null || item.Cancelled == true)
 			{
 				<tr>
 					<td>
