@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using LeaveManagementWebApp.Contracts;
 using LeaveManagementWebApp.Controllers;
 using LeaveManagementWebApp.Data;
@@ -16,6 +17,7 @@ namespace LeaveManagementWebApp.Repositories
 		private readonly IHttpContextAccessor httpContextAccessor;
 		private readonly ILeaveAllocationRepository leaveAllocationRepository;
 		private readonly IEmailSender emailSender;
+		private readonly AutoMapper.IConfigurationProvider configurationProvider;
 		private readonly UserManager<Employee> userManager;
 
 		public LeaveRequestRepository(ApplicationDbContext context,
@@ -23,6 +25,7 @@ namespace LeaveManagementWebApp.Repositories
 			IHttpContextAccessor httpContextAccessor,
 			ILeaveAllocationRepository leaveAllocationRepository,
 			IEmailSender emailSender,
+			AutoMapper.IConfigurationProvider cofigurationProvider,
 			UserManager<Employee> userManager) : base(context)
 		{
 			this.context = context;
@@ -30,6 +33,7 @@ namespace LeaveManagementWebApp.Repositories
 			this.httpContextAccessor = httpContextAccessor;
 			this.leaveAllocationRepository = leaveAllocationRepository;
 			this.emailSender = emailSender;
+			this.configurationProvider = cofigurationProvider;
 			this.userManager = userManager;
 		}
 
@@ -64,16 +68,18 @@ namespace LeaveManagementWebApp.Repositories
 		{
 			var user = await userManager.GetUserAsync(httpContextAccessor?.HttpContext?.User);
 			var allocations = (await leaveAllocationRepository.GetEmployeeAllocations(user.Id)).LeaveAllocations;
-			var requests = mapper.Map<List<LeaveRequestVM>>(await GetAllAsync(user.Id));
+			var requests = await GetAllAsync(user.Id);
 
 			var model = new EmployeeLeaveRequestViewVM(allocations, requests);
 
 			return model;
 		}
 
-		public async Task<List<LeaveRequest>> GetAllAsync(string employeeId)
+		public async Task<List<LeaveRequestVM>> GetAllAsync(string employeeId)
 		{
-			return await context.LeaveRequests.Where(q => q.RequestingEmployeeId == employeeId).ToListAsync();
+			return await context.LeaveRequests.Where(q => q.RequestingEmployeeId == employeeId)
+				.ProjectTo<LeaveRequestVM>(configurationProvider)
+				.ToListAsync();
 		}
 
 		public async Task<AdminLeaveRequestViewVM> GetAdminLeaveRequestList()
